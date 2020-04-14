@@ -5,11 +5,11 @@ import style from "./landing.css";
 
 const Landing = function () {
   // This only applies for Squad leaderboard only
-  // Lets assume that the leaderboard has 10 Squads max (Currently at 100 Squads)
-  // Meaning that 10*4 = 40 members (or 39+4=43 at max)
+  // Lets assume that the leaderboard holds 10 Squads max (Currently at 100 Squads)
   // We limit the leaderboard by each person not by an entire squad
+  // Meaning that 10*4 = 40 members (or 39+4=43 at max)
   // If a member in the squad already having a place in the leaderboard (Higher rank)
-  // Lets count the squad member as 3 and make his name in greyscale (Means he already holding a place on top)
+  // Lets count the squad member as 3 and make his name in lighter color / strikeout (Means he already holding a place on top)
   // (i.e. if already the leaderboard has 26, the new number will be 26+3=29, remove the count of the player who already had a name on the leaderboard)
   // If  a member in the squad already having a place in the leaderboard (Lesser rank)
   // Make the same, count the squad member as 3 and make his name greyscale in the lesser rank.
@@ -20,7 +20,15 @@ const Landing = function () {
 
   // dataTemplate = {"squadId": 1231231, "Rank No": 1, "Slayer Name" : "Test", "isAlreadyPresent" : false, "Time": 1.00}
 
+  // The number of member that the board holds (maxboard + 3)
   let maxBoard = 10;
+
+  // Template for leaderboard rows.
+  // squadId => A unique id to identify the squad, each member in the squad is assigned the same id
+  // rankNo => Rank number,
+  // slayerName => Name of the slayer,
+  // isAlreadyPresent => Is the slayer already holds row in the upper ranks,
+  // Time => time taken to complete the trials (Sorting key)
   const dataTemplate = {
     squadId: 1231231,
     rankNo: 1,
@@ -29,13 +37,15 @@ const Landing = function () {
     Time: 1.0,
   };
 
+  // Used to change maxBoard value to test the functionality
   const setMaxBoard = function (count) {
     maxBoard = count;
-    console.log(maxBoard);
   };
 
+  // The leaderboard table getter and setter
   const [tableData, setTableData] = useState([]);
 
+  // Will return non-duplicate slayers count. (No. of slayer with isAlreadyPresent = false)
   const getNonDuplicateData = function (leaderboardData) {
     let count = 0;
     leaderboardData.forEach(function (data) {
@@ -46,8 +56,13 @@ const Landing = function () {
     return count;
   };
 
+  // Return an array [rankNo, squadId]
+  // rankNo => Rank of the squad by comparing the time
+  // squadId=> The id of the squad which is next to the current squad. (rankNo+1.squadId)
   const getrankNsquad = function (time) {
     const leaderboard = tableData;
+    // -1 => Current squad does not hold any rank in the leaderboard
+    // 0 => There is no squad behind / next to the current squad. (May be the current squad is last squad or the leaderboard is empty)
     let rankNsquad = [-1, 0];
     for (let i = 0; i < leaderboard.length; i += 1) {
       const leaderBoardData = leaderboard[i];
@@ -69,6 +84,8 @@ const Landing = function () {
     return rankNsquad;
   };
 
+  // This will return whether the slayer name is already present in the leaderboard or not.
+  // And also sets isAlreadyPresent = true, if the slayer already present in the leaderboard
   const isNameAlreadyPresent = function (slayerName, time) {
     const copiedTableData = [...tableData];
     for (let i = 0; i < copiedTableData.length; i += 1) {
@@ -85,6 +102,7 @@ const Landing = function () {
     return false;
   };
 
+  // Construction of the leaderboard table row datas (array of json).
   const genData = function (data) {
     const squadData = [];
     const rankNsquad = getrankNsquad(data.Time);
@@ -97,6 +115,8 @@ const Landing = function () {
     const time = data.Time;
     for (let i = 0; i < data.Slayers.length; i += 1) {
       const slayer = data.Slayers[i];
+      // Removing the slayer for possibility of Duos / Trios
+      // Solos can also be placed (Its understandable that solo hunt doesn't come to squad leaderboard)
       if (slayer === undefined || slayer.trim().length === 0) {
         continue;
       }
@@ -110,8 +130,10 @@ const Landing = function () {
     return [nextRankSquadId, squadData];
   };
 
+  // The current squad data is placed by splicing the current leaderboard in to two (before, after)
   const placeData = function (squadId, data) {
     const localTableData = [...tableData];
+    // please read getrankNsquad methods
     if (squadId === 0) {
       const beforeData = localTableData.splice(0);
       let prevRank = 0;
@@ -129,10 +151,12 @@ const Landing = function () {
       if (curData.squadId === squadId) {
         const beforeData = localTableData.splice(0, i);
         const afterData = localTableData;
+        // Updating the ranks of the squad behind current squad
         for (let j = 0; j < afterData.length; j += 1) {
           const curAfterData = afterData[j];
           curAfterData.rankNo += 1;
         }
+        // Merging the before, current, after datas
         const concatData = beforeData.concat(data).concat(afterData);
         return concatData;
       }
@@ -140,6 +164,7 @@ const Landing = function () {
     return localTableData;
   };
 
+  // Will remove the squad (last n numbers) from the leaderboard.
   const removeSquadFrom = function (data, from) {
     while (data.length > from) {
       data.pop();
@@ -147,6 +172,9 @@ const Landing = function () {
     return data;
   };
 
+  // Calulation on how many slayers to be removed (from).
+  // Gets the squadId of last slayer (maxBoard)
+  // Removes the slayers after last slayer (maxBoard) who doesn't hold the same id as last slayer
   const removeExcessInLeaderBoard = function (leaderboardData) {
     let prevSquadId = null;
     for (let i = maxBoard; i < getNonDuplicateData(leaderboardData); i += 1) {
@@ -161,10 +189,12 @@ const Landing = function () {
     return leaderboardData;
   };
 
+  // One way method to set data
   const setFinalData = function (data) {
     setTableData(data);
   };
 
+  // The main method for updating the data from the data_gen component.
   const updateData = function (data) {
     console.log(data);
     const dataGen = genData(data);
