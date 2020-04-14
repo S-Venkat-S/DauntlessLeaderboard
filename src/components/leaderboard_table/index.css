@@ -1,0 +1,28 @@
+.cross{
+    color : red;
+}
+.container {
+  width: 50%;
+  overflow-y: scroll;
+}
+.container thead {
+  font-weight: bold;
+}
+.container table {
+  border-collapse: collapse;
+}
+.container td {
+  border-bottom: solid 1px;
+}
+.slno {
+  width: 5%;
+}
+.rank {
+  width: 5%;
+}
+.slayer {
+  width: 30%;
+}
+.time {
+  width: 10%;
+}

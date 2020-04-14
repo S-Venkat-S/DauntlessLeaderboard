@@ -10,16 +10,16 @@ module.exports = {
   entry: commonPaths.entryPath,
   module: {
     rules: [
-      {
-        enforce: 'pre',
-        test: /\.(js|jsx)$/,
-        loader: 'eslint-loader',
-        exclude: /(node_modules)/,
-        options: {
-          formatter: eslint.CLIEngine.getFormatter('stylish'),
-          emitWarning: process.env.NODE_ENV !== 'production',
-        },
-      },
+      // {
+      //   enforce: 'pre',
+      //   test: /\.(js|jsx)$/,
+      //   loader: 'eslint-loader',
+      //   exclude: /(node_modules)/,
+      //   options: {
+      //     formatter: eslint.CLIEngine.getFormatter('stylish'),
+      //     emitWarning: process.env.NODE_ENV !== 'production',
+      //   },
+      // },
       {
         test: /\.(js|jsx)$/,
         loader: 'babel-loader',

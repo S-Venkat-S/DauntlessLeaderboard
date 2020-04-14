@@ -1,0 +1,16 @@
+.container {
+  width: 50%;
+}
+.container input {
+  font-size: 18px;
+}
+
+.container button {
+  font-size: 18px;
+}
+.inner_container {
+  margin-left: 15%;
+}
+.maxBoard input {
+  width: 75px;
+}
