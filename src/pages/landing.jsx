@@ -21,6 +21,13 @@ const Landing = function () {
   // dataTemplate = {"squadId": 1231231, "Rank No": 1, "Slayer Name" : "Test", "isAlreadyPresent" : false, "Time": 1.00}
 
   let maxBoard = 10;
+  const dataTemplate = {
+    squadId: 1231231,
+    rankNo: 1,
+    slayerName: "Test",
+    isAlreadyPresent: false,
+    Time: 1.0,
+  };
 
   const setMaxBoard = function (count) {
     maxBoard = count;
@@ -31,38 +38,56 @@ const Landing = function () {
 
   const getNonDuplicateData = function (leaderboardData) {
     let count = 0;
-    for (let i of leaderboardData) {
-      if (i.isAlreadyPresent === false) {
+    leaderboardData.forEach(function (data) {
+      if (data.isAlreadyPresent === false) {
         count += 1;
       }
-    }
+    });
     return count;
   };
 
-  const getRank = function (time) {
+  const getrankNsquad = function (time) {
     const leaderboard = tableData;
     let rankNsquad = [-1, 0];
-    for (let i of leaderboard) {
-      if (time < i["Time"]) {
-        rankNsquad = [i["Rank No"], i["squadId"]];
+    for (let i = 0; i < leaderboard.length; i += 1) {
+      const leaderBoardData = leaderboard[i];
+      if (time < leaderBoardData.Time) {
+        rankNsquad = [leaderBoardData.rankNo, leaderBoardData.squadId];
         break;
       }
     }
     if (rankNsquad[0] === -1) {
       if (leaderboard.length === 0) {
         return [1, 0];
-      } if (getNonDuplicateData(leaderboard) < maxBoard) {
-        let i = leaderboard[leaderboard.length - 1];
-        return [i["Rank No"], 0];
       }
-    } else {
+      if (getNonDuplicateData(leaderboard) < maxBoard) {
+        const lastData = leaderboard[leaderboard.length - 1];
+        return [lastData.rankNo, 0];
+      }
       return rankNsquad;
     }
+    return rankNsquad;
+  };
+
+  const isNameAlreadyPresent = function (slayerName, time) {
+    const copiedTableData = [...tableData];
+    for (let i = 0; i < copiedTableData.length; i += 1) {
+      const tableDatum = copiedTableData[i];
+      if (tableDatum.slayerName === slayerName) {
+        if (time < tableDatum.Time) {
+          tableDatum.isAlreadyPresent = true;
+          setTableData(copiedTableData);
+          return false;
+        }
+        return true;
+      }
+    }
+    return false;
   };
 
   const genData = function (data) {
     const squadData = [];
-    const rankNsquad = getRank(data.Time);
+    const rankNsquad = getrankNsquad(data.Time);
     const rankNo = rankNsquad[0];
     if (rankNo === -1) {
       return false;
@@ -70,23 +95,17 @@ const Landing = function () {
     const nextRankSquadId = rankNsquad[1];
     const squadId = Math.random();
     const time = data.Time;
-    for (var i of data.Slayers) {
-      if (i == undefined || i.trim().length == 0) {
+    for (let i = 0; i < data.Slayers.length; i += 1) {
+      const slayer = data.Slayers[i];
+      if (slayer === undefined || slayer.trim().length === 0) {
         continue;
       }
-      let data_template = {
-        squadId: 1231231,
-        "Rank No": 1,
-        "Slayer Name": "Test",
-        isAlreadyPresent: false,
-        Time: 1.0,
-      };
-      data_template["squadId"] = squadId;
-      data_template["Rank No"] = 1;
-      data_template["Slayer Name"] = i;
-      data_template["isAlreadyPresent"] = isNameAlreadyPresent(i, time);
-      data_template["Time"] = time;
-      squadData.push(data_template);
+      dataTemplate.squadId = squadId;
+      dataTemplate.rankNo = rankNo;
+      dataTemplate.slayerName = slayer;
+      dataTemplate.isAlreadyPresent = isNameAlreadyPresent(slayer, time);
+      dataTemplate.Time = time;
+      squadData.push({ ...dataTemplate });
     }
     return [nextRankSquadId, squadData];
   };
@@ -97,10 +116,11 @@ const Landing = function () {
       const beforeData = localTableData.splice(0);
       let prevRank = 0;
       if (beforeData.length > 0) {
-        prevRank = beforeData[beforeData.length - 1]["Rank No"];
+        prevRank = beforeData[beforeData.length - 1].rankNo;
       }
-      for (let k of data) {
-        k["Rank No"] = prevRank + 1;
+      for (let i = 0; i < data.length; i += 1) {
+        const prevData = data[i];
+        prevData.rankNo = prevRank + 1;
       }
       return beforeData.concat(data);
     }
@@ -108,21 +128,16 @@ const Landing = function () {
       const curData = localTableData[i];
       if (curData.squadId === squadId) {
         const beforeData = localTableData.splice(0, i);
-        let prevRank = 0;
-        if (beforeData.length > 0) {
-          prevRank = beforeData[beforeData.length - 1]["Rank No"];
-        }
-        for (let k of data) {
-          k["Rank No"] = prevRank + 1;
-        }
         const afterData = localTableData;
-        for (let j of afterData) {
-          j["Rank No"] = j["Rank No"] + 1;
+        for (let j = 0; j < afterData.length; j += 1) {
+          const curAfterData = afterData[j];
+          curAfterData.rankNo += 1;
         }
         const concatData = beforeData.concat(data).concat(afterData);
         return concatData;
       }
     }
+    return localTableData;
   };
 
   const removeSquadFrom = function (data, from) {
@@ -144,7 +159,7 @@ const Landing = function () {
       }
     }
     return leaderboardData;
-  }
+  };
 
   const setFinalData = function (data) {
     setTableData(data);
@@ -162,22 +177,6 @@ const Landing = function () {
     const finalData = removeExcessInLeaderBoard(leaderBoardData);
     setFinalData(finalData);
     console.log(tableData);
-  };
-
-  const isNameAlreadyPresent = function (slayerName, time) {
-    const copiedTableData = [...tableData];
-    for (let i of copiedTableData) {
-      if (i["Slayer Name"] == slayerName) {
-        if (time < i["Time"]) {
-          i["isAlreadyPresent"] = true;
-          setTableData(copiedTableData);
-          return false;
-        } else {
-          return true;
-        }
-      }
-    }
-    return false;
   };
 
   return (

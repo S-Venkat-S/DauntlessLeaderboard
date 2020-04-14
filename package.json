@@ -11,14 +11,13 @@
   },
   "lint-staged": {
     "*.{js,jsx,scss,css,md}": [
-      "prettier --write --single-quote",
       "eslint --fix",
       "git add"
     ]
   },
   "husky": {
     "hooks": {
-      "pre-commit": "lint-staged"
+      "pre-commit": ""
     }
   },
   "jest": {

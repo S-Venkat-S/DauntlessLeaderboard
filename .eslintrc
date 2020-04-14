@@ -59,6 +59,7 @@
     "react/jsx-key": "error",
     "react/jsx-wrap-multilines": ["warn"],
     "react/jsx-indent-props": 0,
+    "prefer-destructuring": ["warn"],
     "no-trailing-spaces": [2, { "skipBlankLines": true }],
     "prefer-template": 0,
     "import/prefer-default-export": 0,
