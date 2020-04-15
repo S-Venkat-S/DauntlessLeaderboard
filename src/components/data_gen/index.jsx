@@ -115,7 +115,6 @@ const DataGeneration = function (props) {
 
   const updateData = function () {
     const data = { Slayers: [slayer1, slayer2, slayer3, slayer4], Time: time };
-    // console.log(props.updateFunction)
     props.updateFunction(data);
   };
 

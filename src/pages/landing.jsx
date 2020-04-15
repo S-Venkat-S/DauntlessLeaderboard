@@ -21,7 +21,7 @@ const Landing = function () {
   // dataTemplate = {"squadId": 1231231, "Rank No": 1, "Slayer Name" : "Test", "isAlreadyPresent" : false, "Time": 1.00}
 
   // The number of member that the board holds (maxboard + 3)
-  let maxBoard = 10;
+  window.maxBoard = 10;
 
   // Template for leaderboard rows.
   // squadId => A unique id to identify the squad, each member in the squad is assigned the same id
@@ -39,7 +39,7 @@ const Landing = function () {
 
   // Used to change maxBoard value to test the functionality
   const setMaxBoard = function (count) {
-    maxBoard = count;
+    window.maxBoard = parseInt(count, 10);
   };
 
   // The leaderboard table getter and setter
